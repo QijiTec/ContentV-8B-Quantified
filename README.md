@@ -1,4 +1,5 @@
-**量化及加速**这是一个基于Stable Diffusion 3的3D Transformer模型实现，主要特点如下：
+**量化及加速**
+这是一个基于Stable Diffusion 3的3D Transformer模型实现，主要特点如下：
 
 1. 模型架构：
 
@@ -29,7 +30,7 @@ VAE编码器/解码器
 生成过程中的latent空间计算
 Classifier-Free Guidance需要两次前向传播
 
-# 优化显存使用的方案：
+**优化显存使用的方案：**
 
 1. 实时量化方案：
 
@@ -43,20 +44,20 @@ Classifier-Free Guidance需要两次前向传播
 实现渐进式加载，按需加载模型组件
 使用accelerate库的device_map功能
 
-# 显存占用大主要是因为：
+**显存占用大主要是因为：**
 
 1. 多个大型模型组件同时加载
 2. 视频生成过程中的大量中间状态
 3. Classifier-Free Guidance需要两次前向传播
 4. 处理视频数据需要更多显存
  
-# 我将实现以下优化方案：
+**我将实现以下优化方案：**
 
 1. 添加模型卸载功能
 2. 实现动态量化
 3. 优化前向传播过程中的显存使用
 
-# 添加以下功能：
+**添加以下功能：**
 
 1. 添加一个enable_model_cpu_offload方法，用于将模型组件卸载到CPU
 2. 添加一个enable_sequential_cpu_offload方法，用于按顺序卸载模型组件
