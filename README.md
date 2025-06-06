@@ -1,69 +1,70 @@
 **量化及加速**
-这是一个基于Stable Diffusion 3的3D Transformer模型实现，主要特点如下：
-
+这是一个基于Stable Diffusion 3的3D Transformer模型实现，主要特点如下： <br/>
+ <br/>
 1. 模型架构：
 
-使用了SD3Transformer3DModel，继承自SD3Transformer2DModel
-包含大量的attention层（38个attention heads）
-使用了patch embedding和position embedding
-支持NPU（昇腾）加速
+使用了SD3Transformer3DModel，继承自SD3Transformer2DModel <br/>
+包含大量的attention层（38个attention heads） <br/>
+使用了patch embedding和position embedding <br/>
+支持NPU（昇腾）加速 <br/> <br/>
+
 2. 显存占用大的主要原因：
-
-大量的attention层（num_layers=38, num_attention_heads=38）
-较大的attention head维度（attention_head_dim=64）
-3D数据处理（视频或3D数据）需要更多显存
-QKV矩阵计算和存储
-
-从pipeline文件分析，这是一个视频生成模型，基于Stable Diffusion 3架构。显存占用大的主要原因包括：
-
-1. 模型组成：
-
-VAE编码器/解码器
-多个文本编码器（CLIP和T5）
-3D Transformer模型
-处理视频数据（多帧）
-
-2. 运行时显存占用：
-
-大量中间状态和梯度存储
-多个批次的视频帧处理
-生成过程中的latent空间计算
-Classifier-Free Guidance需要两次前向传播
-
+ <br/>
+大量的attention层（num_layers=38, num_attention_heads=38） <br/>
+较大的attention head维度（attention_head_dim=64） <br/>
+3D数据处理（视频或3D数据）需要更多显存 <br/>
+QKV矩阵计算和存储 <br/>
+ <br/>
+**显存占用大的主要原因包括：** <br/>
+ <br/>
+1. 模型组成： <br/>
+ <br/>
+VAE编码器/解码器 <br/>
+多个文本编码器（CLIP和T5） <br/>
+3D Transformer模型 <br/>
+处理视频数据（多帧） <br/>
+ <br/>
+2. 运行时显存占用： <br/>
+ <br/>
+大量中间状态和梯度存储 <br/>
+多个批次的视频帧处理 <br/>
+生成过程中的latent空间计算 <br/>
+Classifier-Free Guidance需要两次前向传播 <br/>
+ <br/>
 **优化显存使用的方案：**
-
-1. 实时量化方案：
-
-对Transformer和文本编码器进行INT8量化
-使用动态量化技术，只在推理时进行量化
-可以使用torch.quantization或bitsandbytes库
-
-2. 模型卸载方案：
-
-使用CPU offloading，将不需要的模型组件临时移到CPU
-实现渐进式加载，按需加载模型组件
-使用accelerate库的device_map功能
-
+ <br/>
+1. 实时量化方案： <br/>
+ <br/>
+对Transformer和文本编码器进行INT8量化 <br/>
+使用动态量化技术，只在推理时进行量化 <br/>
+可以使用torch.quantization或bitsandbytes库 <br/>
+ <br/>
+2. 模型卸载方案： <br/>
+ <br/>
+使用CPU offloading，将不需要的模型组件临时移到CPU <br/>
+实现渐进式加载，按需加载模型组件 <br/>
+使用accelerate库的device_map功能 <br/>
+ <br/>
 **显存占用大主要是因为：**
-
-1. 多个大型模型组件同时加载
-2. 视频生成过程中的大量中间状态
-3. Classifier-Free Guidance需要两次前向传播
-4. 处理视频数据需要更多显存
- 
-**我将实现以下优化方案：**
-
-1. 添加模型卸载功能
-2. 实现动态量化
-3. 优化前向传播过程中的显存使用
-
+ <br/>
+1. 多个大型模型组件同时加载 <br/>
+2. 视频生成过程中的大量中间状态 <br/>
+3. Classifier-Free Guidance需要两次前向传播 <br/>
+4. 处理视频数据需要更多显存 <br/>
+  <br/>
+**优化方案：**
+ <br/>
+1. 添加模型卸载功能 <br/>
+2. 实现动态量化 <br/>
+3. 优化前向传播过程中的显存使用 <br/>
+ <br/>
 **添加以下功能：**
-
-1. 添加一个enable_model_cpu_offload方法，用于将模型组件卸载到CPU
-2. 添加一个enable_sequential_cpu_offload方法，用于按顺序卸载模型组件
-3. 添加一个enable_model_quantization方法，用于量化模型
-4. 修改__call__方法，优化显存使用
-
+ <br/>
+1. 添加一个enable_model_cpu_offload方法，用于将模型组件卸载到CPU <br/>
+2. 添加一个enable_sequential_cpu_offload方法，用于按顺序卸载模型组件 <br/>
+3. 添加一个enable_model_quantization方法，用于量化模型 <br/>
+4. 修改__call__方法，优化显存使用 <br/>
+ <br/>
 
 
 ---
